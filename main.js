@@ -98,7 +98,7 @@ function createInformationBlock(users) {
         gender.innerHTML = '<span>Пол</span><input type="text" value="'+ i.gender +'" placeholder="'+ i.gender +'">';
         age.innerHTML = '<span>Возрост</span><input type="text" value="'+ i.age +'" placeholder="'+ i.age +'">';
         city.innerHTML = '<span>Город</span><input type="text" value="'+ i.city +'" placeholder="'+ i.city +'">';
-        description.innerHTML = '<span>Описание:</span><input type="text" value="'+ i.description +'" placeholder="'+ i.description +'">';
+        description.innerHTML = '<span>Описание:</span><textarea name="" id="">'+ i.description +'</textarea>';
         //---------------------------------
         editData.innerHTML = '<i class="fa fa-pencil" aria-hidden="true"></i>';
         
