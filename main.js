@@ -5,22 +5,22 @@ dataUsergeneration();
 function dataUsergeneration() {
     /* Создаём прототип конструкцию */
     var usersConstructor = {
-        constructor : function (img, lastName, firstName, gender, age, city, description) {
-            this.img = img;
-            this.lastName = lastName;
-            this.firstName = firstName;
-            this.gender = gender;
-            this.age = age;
-            this.city = city;
-            this.description = description;
-            return this;
+            constructor: function (img, lastName, firstName, gender, age, city, description) {
+                this.img = img;
+                this.lastName = lastName;
+                this.firstName = firstName;
+                this.gender = gender;
+                this.age = age;
+                this.city = city;
+                this.description = description;
+                return this;
+            },
+            renderUsers: function () {
+                console.log('Создали пользователей ', this);
+            }
         },
-        renderUsers: function () {
-            console.log('Создали пользователя ', this);
-        }
-    },
-    user_1, user_2, user_3; // пользователи
-    
+        user_1, user_2, user_3; // пользователи
+
     user_1 = Object.create(usersConstructor).constructor(
         'user.png', // имя картинки
         'Дима',
@@ -52,7 +52,7 @@ function dataUsergeneration() {
     user_1.renderUsers();
     user_2.renderUsers();
     user_3.renderUsers();
-    
+
     var postDataUsersArr = [user_1, user_2, user_3];
 
     createInformationBlock(postDataUsersArr);
@@ -61,13 +61,14 @@ function dataUsergeneration() {
 /* Выведем список всех пользователей */
 function createInformationBlock(users) {
     var listPage = document.getElementsByClassName('list-page')[0],
-        title = document.createElement('div');
+        title = document.createElement('div'),
+        idBlock = 0;
 
     title.className = 'title';
     title.innerText = 'Пользователи';
     listPage.appendChild(title);
 
-    users.forEach(function (i) {
+    users.forEach(function (item, i) {
         var createNewBlock = document.createElement('div'),
             imageUser = document.createElement('div'),
             imformationAboutUser = document.createElement('div'),
@@ -79,6 +80,8 @@ function createInformationBlock(users) {
             age = document.createElement('div'),
             city = document.createElement('div'),
             description = document.createElement('div');
+
+        idBlock = i;
 
         /* Классы */
         imformationAboutUser.className = 'information-about-user';
@@ -93,21 +96,68 @@ function createInformationBlock(users) {
         description.className = 'specific-description';
 
         /* Содержимое текста */
-        lastName.innerHTML = '<span>Имя</span><input type="text" value="'+ i.lastName +'" placeholder="'+ i.lastName +'">';
-        firstName.innerHTML = '<span>Фамилия</span><input type="text" value="'+ i.firstName +'" placeholder="'+ i.firstName +'">';
-        gender.innerHTML = '<span>Пол</span><input type="text" value="'+ i.gender +'" placeholder="'+ i.gender +'">';
-        age.innerHTML = '<span>Возрост</span><input type="text" value="'+ i.age +'" placeholder="'+ i.age +'">';
-        city.innerHTML = '<span>Город</span><input type="text" value="'+ i.city +'" placeholder="'+ i.city +'">';
-        description.innerHTML = '<span>Описание:</span><textarea name="" id="">'+ i.description +'</textarea>';
-        //---------------------------------
-        editData.innerHTML = '<i class="fa fa-pencil" aria-hidden="true"></i>';
-        
+        lastName.innerHTML = '<span>Имя</span><input type="text" value="' + item.lastName + '" placeholder="' + item.lastName + '" disabled>';
+        firstName.innerHTML = '<span>Фамилия</span><input type="text" value="' + item.firstName + '" placeholder="' + item.firstName + '" disabled>';
+        gender.innerHTML = '<span>Пол</span><input type="text" value="' + item.gender + '" placeholder="' + item.gender + '" disabled>';
+        age.innerHTML = '<span>Возрост</span><input type="text" value="' + item.age + '" placeholder="' + item.age + '" disabled>';
+        city.innerHTML = '<span>Город</span><input type="text" value="' + item.city + '" placeholder="' + item.city + '" disabled>';
+        description.innerHTML = '<span>Описание:</span><textarea disabled>' + item.description + '</textarea>';
+        /* Добавляем иконку */
+        editData.innerHTML = '<i class="fa fa-pencil" id="' + idBlock + '" aria-hidden="true" onclick="editDataUser(event);"></i>';
+
         /* Добавляем атрибуты */
-        imgUser.setAttribute('src', './'+ i.img);
+        imgUser.setAttribute('src', './' + item.img);
+        createNewBlock.setAttribute('id', idBlock);
 
         imageUser.appendChild(imgUser);
         imformationAboutUser.append(lastName, firstName, gender, age, city, description);
         createNewBlock.append(imageUser, imformationAboutUser, editData);
         listPage.appendChild(createNewBlock);
     });
+}
+
+/* Стелим за состояние нажатия */
+var statusEdit = false;
+
+/* Отслеживаем номер блока по ID, ловим click */
+function editDataUser(data) {
+    var newIdActive = data.toElement.id,
+        blockSearchById = document.getElementById(newIdActive),
+        inputInParentalBlock = blockSearchById.getElementsByTagName('input'),
+        iTagInParentalBlock = blockSearchById.getElementsByClassName('fa fa-pencil')[0], // иконка
+        textareaInParentalBlock = blockSearchById.getElementsByTagName('textarea')[0],
+        replaceIcon = blockSearchById.getElementsByClassName('fa-floppy-o')[0]; // иконка(изменённая)
+
+    console.warn('Чтобы внести изменения в другие блоки - нужно сохранить активные');
+    
+
+    /* Стелим за состояние нажатия */
+    if (!statusEdit) {
+
+        iTagInParentalBlock.classList.replace('fa-pencil', 'fa-floppy-o'); // меняем классы
+        textareaInParentalBlock.removeAttribute('disabled'); // Один атрибут, поэтому в цикл не добавляем
+        textareaInParentalBlock.className = 'active';
+
+        for (var letterActive = 0; letterActive < inputInParentalBlock.length; letterActive++) {
+            inputInParentalBlock[letterActive].className = 'active';
+            inputInParentalBlock[letterActive].removeAttribute('disabled'); // находим внутри основного блока все input[disable] и удаляем их
+        }
+
+        statusEdit = true;
+
+    } else if (replaceIcon) {
+
+        replaceIcon.classList.replace('fa-floppy-o', 'fa-pencil'); // меняем классы
+        textareaInParentalBlock.classList.remove('active'); // Один атрибут, поэтому в цикл не добавляем
+        textareaInParentalBlock.setAttribute('disabled', 'disabled'); // находим внутри основного блока все input[disable] и удаляем их
+
+        for (var letter = 0; letter < inputInParentalBlock.length; letter++) {
+            inputInParentalBlock[letter].removeAttribute('class');
+            inputInParentalBlock[letter].setAttribute('disabled', 'disabled'); // находим внутри основного блока все input[disable] и удаляем их
+        }
+
+        statusEdit = false;
+
+    }
+
 }

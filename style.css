@@ -53,6 +53,11 @@ body {
     cursor: pointer;
 }
 
+.edit-data i:hover {
+    color: orange;
+    transition: 1.5s;
+}
+
 .image-user, .information-about-user {
     display: flex;
     align-items: center;
@@ -150,4 +155,8 @@ body {
     align-items: flex-start;
     width: 100%;
     padding: 2px 0;
+}
+
+.active {
+    border: 1px solid green!important;
 }
