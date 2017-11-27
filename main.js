@@ -1,8 +1,12 @@
 'use strict';
+/* Счетчик для Id в Local Storage */
+var counter = 0;
 
 /* Подгружаем всех пользователей */
 dataUsergeneration();
+
 function dataUsergeneration() {
+    //localStorage.clear();  // чистим Local Storage чтобы небыло конфликтов с ID
     /* Создаём прототип конструкцию */
     var usersConstructor = {
             constructor: function (img, lastName, firstName, gender, age, city, description) {
@@ -53,9 +57,14 @@ function dataUsergeneration() {
     user_2.renderUsers();
     user_3.renderUsers();
 
-    var postDataUsersArr = [user_1, user_2, user_3];
-
-    createInformationBlock(postDataUsersArr);
+    // Отправляем на сохранение в Local Storage 
+    // !Warning - Записываем по одному объекту т.к. устанавливаем ID для каждого JSON Файла
+    createJsonFiles(user_1);
+    createJsonFiles(user_2);
+    createJsonFiles(user_3);
+    
+    // отправляем блоки на создание формы
+    createInformationBlock([user_1, user_2, user_3]);
 }
 
 /* Выведем список всех пользователей */
@@ -68,7 +77,7 @@ function createInformationBlock(users) {
     title.innerText = 'Пользователи';
     listPage.appendChild(title);
 
-    users.forEach(function (item, i) {
+    users.forEach(function (item, i) { // item - объект пользователя
         var createNewBlock = document.createElement('div'),
             imageUser = document.createElement('div'),
             imformationAboutUser = document.createElement('div'),
@@ -96,12 +105,12 @@ function createInformationBlock(users) {
         description.className = 'specific-description';
 
         /* Содержимое текста */
-        lastName.innerHTML = '<span>Имя</span><input type="text" value="' + item.lastName + '" placeholder="' + item.lastName + '" disabled>';
-        firstName.innerHTML = '<span>Фамилия</span><input type="text" value="' + item.firstName + '" placeholder="' + item.firstName + '" disabled>';
-        gender.innerHTML = '<span>Пол</span><input type="text" value="' + item.gender + '" placeholder="' + item.gender + '" disabled>';
-        age.innerHTML = '<span>Возрост</span><input type="text" value="' + item.age + '" placeholder="' + item.age + '" disabled>';
-        city.innerHTML = '<span>Город</span><input type="text" value="' + item.city + '" placeholder="' + item.city + '" disabled>';
-        description.innerHTML = '<span>Описание:</span><textarea disabled>' + item.description + '</textarea>';
+        lastName.innerHTML = '<span>Имя</span><input onchange="changeValue(this);" type="text" value="' + item.lastName + '" placeholder="' + item.lastName + '" disabled>';
+        firstName.innerHTML = '<span>Фамилия</span><input onchange="changeValue(this);" type="text" value="' + item.firstName + '" placeholder="' + item.firstName + '" disabled>';
+        gender.innerHTML = '<span>Пол</span><input onchange="changeValue(this);" type="text" value="' + item.gender + '" placeholder="' + item.gender + '" disabled>';
+        age.innerHTML = '<span>Возрост</span><input onchange="changeValue(this);" type="text" value="' + item.age + '" placeholder="' + item.age + '" disabled>';
+        city.innerHTML = '<span>Город</span><input onchange="changeValue(this);" type="text" value="' + item.city + '" placeholder="' + item.city + '" disabled>';
+        description.innerHTML = '<span>Описание:</span><textarea onchange="changeValue(this);" disabled>' + item.description + '</textarea>';
         /* Добавляем иконку */
         editData.innerHTML = '<i class="fa fa-pencil" id="' + idBlock + '" aria-hidden="true" onclick="editDataUser(event);"></i>';
 
@@ -116,11 +125,26 @@ function createInformationBlock(users) {
     });
 }
 
-/* Стелим за состояние нажатия */
+/* Записываем в Local Storage изменённия по id */
+function changeValue(event) {
+    console.log('value', event);
+    console.log('value', event.value);
+
+    var a = localStorage.getItem('0'); // названия ключа
+    
+    var test = JSON.parse(localStorage.getItem(a));
+
+    console.log('test', test);
+    
+    
+}
+
+/* Cостояние нажатия */
 var statusEdit = false;
 
 /* Отслеживаем номер блока по ID, ловим click */
 function editDataUser(data) {
+    if (!data) return false;
     var newIdActive = data.toElement.id,
         blockSearchById = document.getElementById(newIdActive),
         inputInParentalBlock = blockSearchById.getElementsByTagName('input'),
@@ -129,28 +153,27 @@ function editDataUser(data) {
         replaceIcon = blockSearchById.getElementsByClassName('fa-floppy-o')[0]; // иконка(изменённая)
 
     console.warn('Чтобы внести изменения в другие блоки - нужно сохранить активные');
-    
 
     /* Стелим за состояние нажатия */
     if (!statusEdit) {
-
         iTagInParentalBlock.classList.replace('fa-pencil', 'fa-floppy-o'); // меняем классы
         textareaInParentalBlock.removeAttribute('disabled'); // Один атрибут, поэтому в цикл не добавляем
         textareaInParentalBlock.className = 'active';
 
         for (var letterActive = 0; letterActive < inputInParentalBlock.length; letterActive++) {
-            inputInParentalBlock[letterActive].className = 'active';
+            inputInParentalBlock[letterActive].className = 'active'; // задаём класс тегу
             inputInParentalBlock[letterActive].removeAttribute('disabled'); // находим внутри основного блока все input[disable] и удаляем их
         }
 
         statusEdit = true;
 
     } else if (replaceIcon) {
-
+        console.log('Save');
         replaceIcon.classList.replace('fa-floppy-o', 'fa-pencil'); // меняем классы
         textareaInParentalBlock.classList.remove('active'); // Один атрибут, поэтому в цикл не добавляем
         textareaInParentalBlock.setAttribute('disabled', 'disabled'); // находим внутри основного блока все input[disable] и удаляем их
 
+        /* При сохранении ищем изменения и записываем их JSON, удаляем классы, дезакривируем. */
         for (var letter = 0; letter < inputInParentalBlock.length; letter++) {
             inputInParentalBlock[letter].removeAttribute('class');
             inputInParentalBlock[letter].setAttribute('disabled', 'disabled'); // находим внутри основного блока все input[disable] и удаляем их
@@ -160,4 +183,21 @@ function editDataUser(data) {
 
     }
 
+}
+
+/* Соберём изменённые данные, запишем в LocalStorage */
+function createJsonFiles(Obj) {
+    /* JSON Formating */
+    var jsonObj = JSON.stringify(Obj),
+        eventObj;
+
+    /* запишем в Local Storage */
+    localStorage.setItem(String(counter), jsonObj);
+
+    /* парсим JSON по ключу */
+    eventObj = JSON.parse(localStorage.getItem(String(counter)));
+
+    counter++;
+
+    return eventObj;
 }
